@@ -127,6 +127,12 @@ defmodule Linkify.Builder do
     |> format_extra(uri, opts)
   end
 
+  def create_phone_link(phone, opts) do
+    []
+    |> build_attrs(phone, opts, :class)
+    |> build_attrs("tel:#{phone}", opts, :href)
+    |> format_phone(phone, opts)
+  end
   def format_mention(attrs, name, opts) do
     attrs
     |> format_attrs()
@@ -149,6 +155,12 @@ defmodule Linkify.Builder do
     attrs
     |> format_attrs()
     |> format_tag(uri, opts)
+  end
+
+  def format_phone(attrs, phone, opts) do
+    attrs
+    |> format_attrs()
+    |> format_tag(phone, opts)
   end
 
   def format_tag(attrs, content, %{iodata: true}) do

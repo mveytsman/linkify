@@ -15,6 +15,8 @@ defmodule Linkify.Parser do
 
   @match_skipped_tag ~r/^(?<tag>(a|code|pre)).*>*/
 
+  @match_phone ~r"(?<phone>(?:x\d{2,7})|(?:(?:\+?1\s?(?:[.-]\s?)?)?(?:\(\s?(?:[2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s?\)|(?:[2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s?(?:[.-]\s?)?)(?:[2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s?(?:[.-]\s?)?(?:[0-9]{4}))"
+
   @delimiters ~r/[,.;:>?!]*$/
 
   @en_apostrophes [
@@ -60,7 +62,7 @@ defmodule Linkify.Parser do
       ~s{Check out <a href="http://google.com">google.com</a>}
   """
 
-  @types [:url, :hashtag, :extra, :mention, :email]
+  @types [:url, :hashtag, :extra, :mention, :email, :phone]
 
   def parse(input, opts \\ %{})
   def parse(input, opts) when is_binary(input), do: {input, %{}} |> parse(opts) |> elem(0)
@@ -211,6 +213,13 @@ defmodule Linkify.Parser do
 
   def check_and_link(:extra, buffer, opts, _user_acc) do
     if String.starts_with?(buffer, @prefix_extra), do: link_extra(buffer, opts), else: :nomatch
+  end
+
+  def check_and_link(:phone, buffer, opts, _user_acc) do
+    case Regex.run(@match_phone, buffer, capture: [:phone]) do
+      [phone] -> link_phone(buffer, opts)
+      nil -> :nomatch
+    end
   end
 
   defp maybe_strip_parens(buffer) do
@@ -419,6 +428,12 @@ defmodule Linkify.Parser do
   def link_extra(buffer, opts) do
     Builder.create_extra_link(buffer, opts)
   end
+
+  @doc false
+  def link_phone(buffer, opts) do
+    Builder.create_phone_link(buffer, opts)
+  end
+
 
   defp link(buffer, opts, user_acc) do
     Enum.reduce_while(@types, {buffer, user_acc}, fn type, _ ->

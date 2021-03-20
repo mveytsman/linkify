@@ -638,6 +638,16 @@ defmodule LinkifyTest do
       assert Linkify.link(text, email: true) == expected
     end
 
+    test "phone" do
+      text =
+        "718-555-1234"
+
+      expected =
+        "<a href=\"tel:718-555-1234\">718-555-1234</a>"
+
+      assert Linkify.link(text, phone: true) == expected
+    end
+
     test "magnet" do
       text =
         "magnet:?xt=urn:btih:a4104a9d2f5615601c429fe8bab8177c47c05c84&dn=ubuntu-18.04.1.0-live-server-amd64.iso&tr=http%3A%2F%2Ftorrent.ubuntu.com%3A6969%2Fannounce&tr=http%3A%2F%2Fipv6.torrent.ubuntu.com%3A6969%2Fannounce"
